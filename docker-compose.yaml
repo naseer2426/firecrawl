@@ -10,8 +10,6 @@ x-common-service: &common-service
     nofile:
       soft: 65535
       hard: 65535
-  networks:
-    - backend
   extra_hosts:
     - "host.docker.internal:host-gateway"
 
@@ -19,7 +17,7 @@ x-common-env: &common-env
   REDIS_URL: ${REDIS_URL:-redis://redis:6379}
   REDIS_RATE_LIMIT_URL: ${REDIS_URL:-redis://redis:6379}
   PLAYWRIGHT_MICROSERVICE_URL: ${PLAYWRIGHT_MICROSERVICE_URL:-http://playwright-service:3000/scrape}
-  NUQ_DATABASE_URL: postgres://postgres:postgres@nuq-postgres:5432/postgres
+  NUQ_DATABASE_URL: ${DATABASE_URL:postgres://postgres:postgres@nuq-postgres:5432/postgres}
   USE_DB_AUTHENTICATION: ${USE_DB_AUTHENTICATION}
   OPENAI_API_KEY: ${OPENAI_API_KEY}
   OPENAI_BASE_URL: ${OPENAI_BASE_URL}
@@ -57,8 +55,6 @@ services:
       PROXY_USERNAME: ${PROXY_USERNAME}
       PROXY_PASSWORD: ${PROXY_PASSWORD}
       BLOCK_MEDIA: ${BLOCK_MEDIA}
-    networks:
-      - backend
 
   api:
     <<: *common-service
@@ -83,8 +79,6 @@ services:
     image: redis:alpine
     # image: valkey/valkey:alpine
 
-    networks:
-      - backend
     command: redis-server --bind 0.0.0.0
   
   nuq-postgres:
@@ -93,11 +87,5 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-    networks:
-      - backend
     ports:
       - "5432:5432"
-
-networks:
-  backend:
-    driver: bridge
